@@ -3,7 +3,7 @@ import os
 import glob
 import importlib.machinery
 
-from djangonautic import settings
+from djangounchained import settings
 from django.core.management import BaseCommand
 
 
