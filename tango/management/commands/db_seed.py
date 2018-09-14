@@ -1,9 +1,6 @@
-import ast
 import os
-import glob
+import ast
 import importlib.machinery
-
-from djangounchained import settings
 from django.core.management import BaseCommand
 
 
@@ -11,28 +8,19 @@ class Command(BaseCommand):
     help = 'Seed the database with records'
 
     def handle(self, *args, **options):
-        apps = self.get_installed_apps()
-        self.run_seeds(apps)
+        self.run_seeds()
 
     @staticmethod
-    def get_installed_apps():
-        apps = []
+    def run_seeds():
+        app_name = os.getenv('APP_NAME') + '.database_seeder'
+        module = importlib.import_module(app_name)
+        database_seeder_class = getattr(module, 'DatabaseSeeder')
 
-        for app in settings.INSTALLED_APPS:
-            if 'django.contrib' not in app:
-                apps.append(app)
-
-        return apps
-
-    @staticmethod
-    def run_seeds(apps):
-        for app in apps:
-            if os.path.isdir(app) and os.path.isdir(app + '/seeds'):
-                for seed_file in glob.glob(app + '/seeds/[!_]*.py'):
-                    class_name = Command.get_seed_class_name(seed_file)
-                    seed_module = importlib.machinery.SourceFileLoader('seed', seed_file).load_module()
-                    seed_class = getattr(seed_module, class_name)
-                    seed_class.run()
+        for seed in database_seeder_class.seeds:
+            class_name = Command.get_seed_class_name(seed.__file__)
+            seed_module = importlib.machinery.SourceFileLoader('seed', seed.__file__).load_module()
+            seed_class = getattr(seed_module, class_name)
+            seed_class.run()
 
     @staticmethod
     def get_seed_class_name(seed_file):
