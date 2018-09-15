@@ -6,7 +6,7 @@ echo -e "Hello, welcome to Django! \n"
 ############ Rename app ############
 
 
-############ Create .env file ############
+############ Manipulate .env ############
 echo -e "Creating .env file..."
 if [ ! -f $PWD"/.env" ]; then
     cp ./.env.example ./.env
