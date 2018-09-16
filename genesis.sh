@@ -3,10 +3,42 @@
 echo -e "Hello, welcome to Django! \n"
 
 
-############ Rename app ############
+############# Rename app ############
+echo -e "Giving App a Name..."
+read -p "App Name: (djangounchained): " app_name
+
+if [ -d $PWD"/djangounchained" ]
+then
+    ### Rename references inside root app
+    find djangounchained/. -type f -name '*.py' -print0 | xargs -0 sed -i s/djangounchained/${app_name}/g
+
+    ### Rename references in manage.py file
+    find manage.py -type f -name '*.py' -print0 | xargs -0 sed -i s/djangounchained/${app_name}/g
+
+    ### Rename folders
+    mv djangounchained ${app_name}
+    mv templates/djangounchained templates/${app_name}
+fi
 
 
-############ Manipulate .env ############
+############ Create virtual environment and install dependencies ############
+echo "Creating virtual environments..."
+
+venv_path=$PWD"/../venv"
+
+if [ -d ${venv_path} ]; then
+    rm -rf ${venv_path}
+fi
+
+python -m virtualenv ${venv_path}
+
+source ${venv_path}/bin/activate
+
+echo "Installing dependencies..."
+pip install -r requirements.txt
+
+
+############# Manipulate .env ############
 echo -e "Creating .env file..."
 if [ ! -f $PWD"/.env" ]; then
     cp ./.env.example ./.env
