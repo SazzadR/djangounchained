@@ -12,6 +12,7 @@ Todos
 ---
  - Write Shell command to automate git setup in project.
  - Receive optional `--class` argument in `db_seed` command to select which seed to run.
+ - Add functionality to dynamically select different types database from `.env`. Right now it's configured only for `PostgreSQL`.
 
 License
 ----
