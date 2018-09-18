@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'tango',
+    # 'tango_authentication',
 ]
 
 MIDDLEWARE = [
@@ -91,6 +92,10 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT')
     }
 }
+
+
+# Custom User class
+# AUTH_USER_MODEL = 'tango_authentication.User'
 
 
 # Password validation
