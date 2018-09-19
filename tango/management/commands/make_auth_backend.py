@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management import BaseCommand
 
@@ -19,6 +20,7 @@ class Command(BaseCommand):
 
         self.create_app()
         self.create_backend()
+        self.update_settings()
 
     def create_app(self):
         if os.path.exists(self.app_name):
@@ -37,3 +39,18 @@ class Command(BaseCommand):
         with open(model_file_path, 'w') as fp:
             stub = self.load_stub()
             fp.write(stub)
+
+    def update_settings(self):
+        settings_file = settings.BASE_DIR + '/djangounchained/settings.py'
+
+        with open(settings_file) as file:
+            settings_file_lines = list(file)
+
+        with open(settings_file, 'w') as file_writrer:
+            for line in settings_file_lines:
+                if line.startswith("# AUTH_USER_MODEL = 'tango_authentication.User'"):
+                    file_writrer.write("AUTH_USER_MODEL = '{}.User'\n".format(self.app_name))
+                elif line.startswith("    # 'tango_authentication',"):
+                    file_writrer.write("    '{}',\n".format(self.app_name))
+                else:
+                    file_writrer.write(line)
