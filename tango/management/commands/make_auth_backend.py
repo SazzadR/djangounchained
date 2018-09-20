@@ -1,4 +1,5 @@
 import os
+import re
 
 from django.conf import settings
 from django.core.management import call_command
@@ -11,6 +12,7 @@ class Command(BaseCommand):
     def __init__(self):
         super().__init__()
         self.app_name = None
+        self.settings_file = '{}/{}/settings.py'.format(settings.BASE_DIR, os.getenv('APP_NAME'))
 
     def add_arguments(self, parser):
         parser.add_argument('app_name', type=str, nargs='?', default='tango_authentication')
@@ -23,7 +25,7 @@ class Command(BaseCommand):
         self.update_settings()
 
     def create_app(self):
-        if os.path.exists(self.app_name):
+        if os.path.exists(self.app_name) or ('AUTH_USER_MODEL' in open(self.settings_file).read()):
             raise ValueError('App or directory already exists!')
 
         call_command('startapp', self.app_name)
@@ -41,16 +43,16 @@ class Command(BaseCommand):
             fp.write(stub)
 
     def update_settings(self):
-        settings_file = settings.BASE_DIR + '/djangounchained/settings.py'
+        with open(self.settings_file, 'r') as fp:
+            file_contents = fp.read()
+            fp.close()
 
-        with open(settings_file) as file:
-            settings_file_lines = list(file)
+        # Update installed apps
+        file_contents = re.sub(r"('tango',)", r"\1\n    '{}',".format(self.app_name), file_contents)
 
-        with open(settings_file, 'w') as file_writrer:
-            for line in settings_file_lines:
-                if line.startswith("# AUTH_USER_MODEL = 'tango_authentication.User'"):
-                    file_writrer.write("AUTH_USER_MODEL = '{}.User'\n".format(self.app_name))
-                elif line.startswith("    # 'tango_authentication',"):
-                    file_writrer.write("    '{}',\n".format(self.app_name))
-                else:
-                    file_writrer.write(line)
+        # Add custom user model
+        file_contents += "\n\n# Custom User model\nAUTH_USER_MODEL = '{}.User'\n".format(self.app_name)
+
+        with open(self.settings_file, 'w') as fp:
+            fp.write(file_contents)
+            fp.close()
