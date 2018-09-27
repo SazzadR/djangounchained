@@ -25,3 +25,10 @@ def debug(input_object, title_text=None):
         print(terminal_red_bg + 'Debugger doesn\'t support this format...' + terminal_end)
 
     print('\n' + terminal_yellow_bg + '========================= End =========================' + terminal_end + '\n')
+
+
+def with_default(input_value, default=None):
+    if input_value:
+        return input_value
+    else:
+        return default

@@ -1,0 +1,10 @@
+from django.urls import path
+from {app_name}.views.login import Login
+from {app_name}.views.register import Register
+
+app_name = '{app_name}'
+
+urlpatterns = [
+    path('accounts/register', Register.as_view(), name='register'),
+    path('accounts/login', Login.as_view(), name='login'),
+]

@@ -1,0 +1,39 @@
+{% extends '{project_name}/layouts/app.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">Register</div>
+
+                    <div class="card-body">
+                        <form method="POST" action="javascript:void(0)">
+                            {% csrf_token %}
+
+                            {% for field in form %}
+                                <div class="form-group row">
+                                    <label for="{{ field.name }}"
+                                           class="col-sm-4 col-form-label text-md-right">{{ field.label }}</label>
+
+                                    <div class="col-md-6">
+                                        {{ field }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-group row mb-0">
+                                <div class="col-md-6 offset-md-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        Register
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

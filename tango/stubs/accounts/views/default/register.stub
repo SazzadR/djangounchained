@@ -1,0 +1,22 @@
+from django.views import View
+from django.urls import reverse
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from {app_name}.forms import RegistrationForm
+from django.contrib.auth import authenticate, login
+
+
+class Register(View):
+    def get(self, request):
+        form = RegistrationForm()
+
+        return render(request, '{app_name}/register.html', {'form': form})
+
+    def post(self, request):
+        form = RegistrationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('{app_name}:login'))
+        else:
+            return render(request, '{app_name}/register.html', {'form': form})

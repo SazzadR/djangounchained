@@ -1,0 +1,86 @@
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+
+
+class RegistrationForm(UserCreationForm):
+    name = forms.CharField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control',
+            'id': 'name'
+        }
+    ))
+    email = forms.EmailField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control',
+            'id': 'email'
+        }
+    ))
+    password1 = forms.CharField(
+        label="Password",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'password1'
+            }
+        )
+    )
+    password2 = forms.CharField(
+        label="Confirm Password",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'password2'
+            }
+        )
+    )
+
+    field_order = [
+        'name',
+        'email',
+        'password1',
+        'password2'
+    ]
+
+    class Meta:
+        model = get_user_model()
+        fields = {
+            'name',
+            'email',
+            'password1',
+            'password2'
+        }
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.EmailField(widget=forms.TextInput(
+        attrs={
+            'class': 'form-control',
+            'id': 'username'
+        }
+    ))
+    password = forms.CharField(
+        label='Password',
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'password'
+            }
+        )
+    )
+
+    field_order = [
+        'username',
+        'password',
+    ]
+
+    class Meta:
+        model = get_user_model()
+        fields = {
+            'username',
+            'password',
+        }
