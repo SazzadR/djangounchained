@@ -12,40 +12,67 @@ class Command(BaseCommand):
     def __init__(self):
         super().__init__()
 
-        self.app_name = 'accounts'
+        self.accounts_app_name = 'accounts'
+        self.home_app_name = 'home'
 
         print('Do you want to use custom User model? (y/n): ', end='')
         model_input = input().lower()
         self.custom_user_model = with_default((model_input == 'y'), False)
 
         self.settings_file = '{}/{}/settings.py'.format(settings.BASE_DIR, os.getenv('APP_NAME'))
-        self.views = {
+        self.accounts_views = {
             'tango/stubs/accounts/views/default/forms.stub': '{0}/forms.py'.format(
-                self.app_name),
+                self.accounts_app_name),
             'tango/stubs/accounts/views/default/login.stub': '{0}/views/login.py'.format(
-                self.app_name),
+                self.accounts_app_name),
             'tango/stubs/accounts/views/default/register.stub': '{0}/views/register.py'.format(
-                self.app_name)
+                self.accounts_app_name)
         }
-        self.templates = {
+        self.accounts_templates = {
             'tango/stubs/accounts/templates/app.stub': 'templates/{0}/layouts/app.html'.format(os.getenv('APP_NAME')),
             'tango/stubs/accounts/templates/default/login.stub': '{0}/templates/{0}/login.html'.format(
-                self.app_name),
+                self.accounts_app_name),
             'tango/stubs/accounts/templates/default/register.stub': '{0}/templates/{0}/register.html'.format(
-                self.app_name)
+                self.accounts_app_name)
+        }
+        self.home_templates = {
+            'tango/stubs/home/templates/home.stub': '{0}/templates/{0}/home.html'.format(
+                self.home_app_name)
         }
 
     def handle(self, *args, **options):
-        self.create_app()
+        # self.create_accounts_app()
+        self.create_home_app()
+
+    def create_accounts_app(self):
+        self.create_app(self.accounts_app_name)
         self.create_models_and_backend()
         self.update_settings()
         self.scaffold_actions()
 
-    def create_app(self):
-        if os.path.exists(self.app_name) or ('AUTH_USER_MODEL' in open(self.settings_file).read()):
-            raise ValueError('App or directory already exists!')
+    def create_home_app(self):
+        self.create_app(self.home_app_name)
+        self.update_installed_app(self.home_app_name)
+        self.create_templates(self.home_templates)
+        self.create_urls(self.home_app_name, 'home')
 
-        call_command('startapp', self.app_name)
+    def create_app(self, name):
+        if os.path.exists(name):
+            raise ValueError('{} app or directory already exists!'.format(name))
+
+        call_command('startapp', name)
+
+    def update_installed_app(self, app_name):
+        with open(self.settings_file, 'r') as fp:
+            file_contents = fp.read()
+            fp.close()
+
+        # Update INSTALLED_APPS
+        file_contents = re.sub(r"('tango',)", r"\1\n    '{}',".format(app_name), file_contents)
+
+        with open(self.settings_file, 'w') as fp:
+            fp.write(file_contents)
+            fp.close()
 
     def create_models_and_backend(self):
         if self.custom_user_model:
@@ -54,7 +81,7 @@ class Command(BaseCommand):
             self.create_default_model()
 
     def create_default_model(self):
-        model_file_path = self.app_name + '/models.py'
+        model_file_path = self.accounts_app_name + '/models.py'
 
         with open(model_file_path, 'w') as fp:
             stub = self.load_model_stub('default')
@@ -66,10 +93,10 @@ class Command(BaseCommand):
             fp.close()
 
         # Update INSTALLED_APPS
-        file_contents = re.sub(r"('tango',)", r"\1\n    '{}',".format(self.app_name), file_contents)
+        file_contents = re.sub(r"('tango',)", r"\1\n    '{}',".format(self.accounts_app_name), file_contents)
 
         # Add AUTH_USER_MODEL
-        file_contents += "\n\n# User model\nAUTH_USER_MODEL = '{}.User'\n\n\n".format(self.app_name)
+        file_contents += "\n\n# User model\nAUTH_USER_MODEL = '{}.User'\n\n\n".format(self.accounts_app_name)
 
         # Add AUTHENTICATION_BACKENDS
         file_contents += self.add_authentication_backends()
@@ -91,28 +118,28 @@ class Command(BaseCommand):
 
     def scaffold_actions(self):
         self.create_views()
-        self.create_templates()
-        self.create_urls()
+        self.create_templates(self.accounts_templates)
+        self.create_urls(self.accounts_app_name)
         self.update_homepage()
 
     def create_views(self):
-        os.makedirs(self.app_name + '/views', exist_ok=True)
-        with open(self.app_name + '/views/__init__.py', 'w') as fp:
+        os.makedirs(self.accounts_app_name + '/views', exist_ok=True)
+        with open(self.accounts_app_name + '/views/__init__.py', 'w') as fp:
             pass
         fp.close()
 
-        for stub in self.views:
-            view_name = self.views[stub]
+        for stub in self.accounts_views:
+            view_name = self.accounts_views[stub]
             os.makedirs(os.path.dirname(view_name), exist_ok=True)
             with open(view_name, 'w') as fp:
                 with open(stub, 'r') as fp_stub:
-                    fp.write(fp_stub.read().replace('{app_name}', self.app_name))
+                    fp.write(fp_stub.read().replace('{app_name}', self.accounts_app_name))
                 fp_stub.close()
             fp.close()
 
-    def create_templates(self):
-        for stub in self.templates:
-            template_name = self.templates[stub]
+    def create_templates(self, templates):
+        for stub in templates:
+            template_name = templates[stub]
 
             os.makedirs(os.path.dirname(template_name), exist_ok=True)
             with open(template_name, 'w') as fp:
@@ -121,10 +148,10 @@ class Command(BaseCommand):
                 fp_stub.close()
             fp.close()
 
-    def create_urls(self):
-        with open('{}/urls.py'.format(self.app_name), 'w') as fp:
-            with open('tango/stubs/accounts/urls.stub', 'r') as fp_stub:
-                stub = fp_stub.read().replace('{app_name}', self.app_name)
+    def create_urls(self, app_name, namespace=''):
+        with open('{}/urls.py'.format(app_name), 'w') as fp:
+            with open('tango/stubs/{}/urls.stub'.format(app_name), 'r') as fp_stub:
+                stub = fp_stub.read().replace('{app_name}', app_name)
                 fp.write(stub)
             fp_stub.close()
         fp.close()
@@ -134,8 +161,8 @@ class Command(BaseCommand):
         fp.close()
 
         updated_url_file = current_urls_file_content.replace("urlpatterns = [\n",
-                                                             "urlpatterns = [\n    path('', include('{}.urls', namespace='accounts')),\n".format(
-                                                                 self.app_name))
+                                                             "urlpatterns = [\n    path('{0}', include('{1}.urls', namespace='{1}')),\n"
+                                                             .format(namespace, app_name))
 
         with open(os.getenv('APP_NAME') + '/urls.py', 'w') as fp:
             fp.write(updated_url_file)

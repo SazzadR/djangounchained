@@ -5,12 +5,30 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 
 class RegistrationForm(UserCreationForm):
-    name = forms.CharField(widget=forms.TextInput(
+    username = forms.CharField(widget=forms.TextInput(
         attrs={
             'class': 'form-control',
-            'id': 'name'
+            'id': 'username'
         }
     ))
+    first_name = forms.CharField(
+        label="First Name",
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'first_name'
+            }
+        )
+    )
+    last_name = forms.CharField(
+        label="Last Name",
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'id': 'last_name'
+            }
+        )
+    )
     email = forms.EmailField(widget=forms.TextInput(
         attrs={
             'class': 'form-control',
@@ -39,7 +57,9 @@ class RegistrationForm(UserCreationForm):
     )
 
     field_order = [
-        'name',
+        'username',
+        'first_name',
+        'last_name',
         'email',
         'password1',
         'password2'
@@ -48,7 +68,9 @@ class RegistrationForm(UserCreationForm):
     class Meta:
         model = get_user_model()
         fields = {
-            'name',
+            'username',
+            'first_name',
+            'last_name',
             'email',
             'password1',
             'password2'

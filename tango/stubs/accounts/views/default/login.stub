@@ -16,4 +16,4 @@ class Login(View):
         user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
         login(request, user)
 
-        return redirect('posts:home')
+        return redirect('/')
