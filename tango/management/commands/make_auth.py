@@ -41,7 +41,7 @@ class Command(BaseCommand):
         }
 
     def handle(self, *args, **options):
-        # self.create_accounts_app()
+        self.create_accounts_app()
         self.create_home_app()
 
     def create_accounts_app(self):
@@ -55,6 +55,7 @@ class Command(BaseCommand):
         self.update_installed_app(self.home_app_name)
         self.create_templates(self.home_templates)
         self.create_urls(self.home_app_name, 'home')
+        self.create_home_views()
 
     def create_app(self, name):
         if os.path.exists(name):
@@ -168,6 +169,13 @@ class Command(BaseCommand):
             fp.write(updated_url_file)
         fp.close()
 
+    def create_home_views(self):
+        with open('{}/views.py'.format(self.home_app_name), 'w') as fp:
+            with open('tango/stubs/{}/views.stub'.format(self.home_app_name), 'r') as fp_stub:
+                fp.write(fp_stub.read())
+            fp_stub.close()
+        fp.close()
+
     def update_homepage(self):
         default_template = 'templates/' + os.getenv('APP_NAME') + '/default.html'
 
@@ -175,7 +183,8 @@ class Command(BaseCommand):
             updated_contents = fp.read() \
                 .replace('<a href="javascript:void(0)">Login</a>', '<a href="{% url \'accounts:login\' %}">Login</a>') \
                 .replace('<a href="javascript:void(0)">Register</a>',
-                         '<a href="{% url \'accounts:register\' %}">Register</a>')
+                         '<a href="{% url \'accounts:register\' %}">Register</a>') \
+                .replace('<a href="javascript:void(0)">Home</a>', '<a href="{% url \'home:index\' %}">Home</a>')
         fp.close()
 
         with open(default_template, 'w') as fp:
