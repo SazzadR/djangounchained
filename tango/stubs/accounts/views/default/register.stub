@@ -4,9 +4,11 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from {app_name}.forms import RegistrationForm
 from django.contrib.auth import authenticate, login
+from tango.decorators import unauthenticated_required
 
 
 class Register(View):
+    @unauthenticated_required()
     def get(self, request):
         form = RegistrationForm()
 

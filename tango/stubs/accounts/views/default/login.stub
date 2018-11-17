@@ -3,10 +3,12 @@ from django.urls import reverse
 from django.http import HttpResponse
 from accounts.forms import LoginForm
 from django.shortcuts import render, redirect
+from tango.decorators import unauthenticated_required
 from django.contrib.auth import authenticate, login, logout
 
 
 class Login(View):
+    @unauthenticated_required()
     def get(self, request):
         form = LoginForm()
 
