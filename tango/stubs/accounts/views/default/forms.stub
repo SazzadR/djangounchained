@@ -78,7 +78,7 @@ class RegistrationForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(widget=forms.TextInput(
+    username = forms.CharField(widget=forms.TextInput(
         attrs={
             'class': 'form-control',
             'id': 'username'
