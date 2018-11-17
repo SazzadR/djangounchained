@@ -13,10 +13,14 @@ class Login(View):
         return render(request, 'accounts/login.html', {'form': form})
 
     def post(self, request):
-        user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
-        login(request, user)
+        form = LoginForm(data=request.POST)
 
-        return redirect('/')
+        if form.is_valid():
+            user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+            login(request, user)
+            return redirect('/')
+        else:
+            return render(request, 'accounts/login.html', {'form': form})
 
 
 class Logout(View):

@@ -1,5 +1,7 @@
 {% extends '{project_name}/layouts/app.html' %}
 
+{% load widget_tweaks %}
+
 {% block content %}
     <div class="container">
         <div class="row justify-content-center">
@@ -8,17 +10,47 @@
                     <div class="card-header">Login</div>
 
                     <div class="card-body">
-                        <form action="" method="post">
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <ul>
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <form action="{% url 'accounts:login' %}" method="post">
                             {% csrf_token %}
 
-                            {% for field in form %}
+                            {% for field in form.visible_fields %}
                                 <div class="form-group row">
                                     <label for="{{ field.name }}"
                                            class="col-sm-4 col-form-label text-md-right">{{ field.label }}</label>
 
                                     <div class="col-md-6">
-                                        {{ field }}
+                                        {% if form.is_bound %}
+                                            {% if field.errors %}
+                                                {% render_field field class="form-control is-invalid" %}
+                                                {% for error in field.errors %}
+                                                    <div class="invalid-feedback">
+                                                        {{ error }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                {% render_field field class="form-control" %}
+                                            {% endif %}
+                                        {% else %}
+                                            {% render_field field class="form-control" %}
+                                        {% endif %}
+                                        {% if field.help_text %}
+                                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                                        {% endif %}
                                     </div>
+
                                 </div>
                             {% endfor %}
 
@@ -34,6 +66,13 @@
                                 </div>
                             </div>
                         </form>
+
+                        {% comment %}<form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit">Login</button>
+                        </form>{% endcomment %}
+
                     </div>
                 </div>
             </div>
