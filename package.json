@@ -1,0 +1,6 @@
+{
+    "private": true,
+    "devDependencies": {
+        "laravel-mix": "^2.1.14"
+    }
+}
